@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		95934B11976D4971A0D095E4 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B6AE124A606D4AFCB95D4476 /* libPods.a */; };
 		AB4ABD0E174368B60020A10D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4ABD0D174368B60020A10D /* UIKit.framework */; };
 		AB4ABD10174368B60020A10D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4ABD0F174368B60020A10D /* Foundation.framework */; };
 		AB4ABD12174368B60020A10D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4ABD11174368B60020A10D /* CoreGraphics.framework */; };
@@ -24,6 +25,9 @@
 		AB4ABD37174368B60020A10D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4ABD0F174368B60020A10D /* Foundation.framework */; };
 		AB4ABD3F174368B60020A10D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AB4ABD3D174368B60020A10D /* InfoPlist.strings */; };
 		AB4ABD42174368B60020A10D /* TMShareMaskTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4ABD41174368B60020A10D /* TMShareMaskTests.m */; };
+		AB4ABD4E17438E270020A10D /* TMShareMaskTool.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4ABD4D17438E270020A10D /* TMShareMaskTool.m */; };
+		AB4ABD5117438E3D0020A10D /* TMShareMaskItem.m in Sources */ = {isa = PBXBuildFile; fileRef = AB4ABD5017438E3D0020A10D /* TMShareMaskItem.m */; };
+		AB4ABD531743EE0C0020A10D /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB4ABD521743EE0C0020A10D /* MessageUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +64,13 @@
 		AB4ABD3E174368B60020A10D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AB4ABD40174368B60020A10D /* TMShareMaskTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TMShareMaskTests.h; sourceTree = "<group>"; };
 		AB4ABD41174368B60020A10D /* TMShareMaskTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TMShareMaskTests.m; sourceTree = "<group>"; };
+		AB4ABD4C17438E270020A10D /* TMShareMaskTool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TMShareMaskTool.h; sourceTree = "<group>"; };
+		AB4ABD4D17438E270020A10D /* TMShareMaskTool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TMShareMaskTool.m; sourceTree = "<group>"; };
+		AB4ABD4F17438E3D0020A10D /* TMShareMaskItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TMShareMaskItem.h; sourceTree = "<group>"; };
+		AB4ABD5017438E3D0020A10D /* TMShareMaskItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TMShareMaskItem.m; sourceTree = "<group>"; };
+		AB4ABD521743EE0C0020A10D /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		B6AE124A606D4AFCB95D4476 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C043091E49AC4307A481A3D9 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,9 +78,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB4ABD531743EE0C0020A10D /* MessageUI.framework in Frameworks */,
 				AB4ABD0E174368B60020A10D /* UIKit.framework in Frameworks */,
 				AB4ABD10174368B60020A10D /* Foundation.framework in Frameworks */,
 				AB4ABD12174368B60020A10D /* CoreGraphics.framework in Frameworks */,
+				95934B11976D4971A0D095E4 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +106,7 @@
 				AB4ABD3A174368B60020A10D /* TMShareMaskTests */,
 				AB4ABD0C174368B60020A10D /* Frameworks */,
 				AB4ABD0B174368B60020A10D /* Products */,
+				C043091E49AC4307A481A3D9 /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,10 +122,12 @@
 		AB4ABD0C174368B60020A10D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB4ABD521743EE0C0020A10D /* MessageUI.framework */,
 				AB4ABD0D174368B60020A10D /* UIKit.framework */,
 				AB4ABD0F174368B60020A10D /* Foundation.framework */,
 				AB4ABD11174368B60020A10D /* CoreGraphics.framework */,
 				AB4ABD34174368B60020A10D /* SenTestingKit.framework */,
+				B6AE124A606D4AFCB95D4476 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -119,6 +135,7 @@
 		AB4ABD13174368B60020A10D /* TMShareMask */ = {
 			isa = PBXGroup;
 			children = (
+				AB4ABD4B17438A720020A10D /* TMShareMask */,
 				AB4ABD1C174368B60020A10D /* TMSMAppDelegate.h */,
 				AB4ABD1D174368B60020A10D /* TMSMAppDelegate.m */,
 				AB4ABD25174368B60020A10D /* MainStoryboard_iPhone.storyboard */,
@@ -163,6 +180,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		AB4ABD4B17438A720020A10D /* TMShareMask */ = {
+			isa = PBXGroup;
+			children = (
+				AB4ABD4C17438E270020A10D /* TMShareMaskTool.h */,
+				AB4ABD4D17438E270020A10D /* TMShareMaskTool.m */,
+				AB4ABD4F17438E3D0020A10D /* TMShareMaskItem.h */,
+				AB4ABD5017438E3D0020A10D /* TMShareMaskItem.m */,
+			);
+			path = TMShareMask;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -170,9 +198,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AB4ABD45174368B60020A10D /* Build configuration list for PBXNativeTarget "TMShareMask" */;
 			buildPhases = (
+				4818ADF79C3F49959F36E9AE /* Check Pods Manifest.lock */,
 				AB4ABD06174368B60020A10D /* Sources */,
 				AB4ABD07174368B60020A10D /* Frameworks */,
 				AB4ABD08174368B60020A10D /* Resources */,
+				C13B64AAC2134F4A8CB0E16F /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -255,6 +285,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		4818ADF79C3F49959F36E9AE /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sanbox is not in sync with the Podfile.lock. Run 'pod install'.\nEOM\n    exit 1\nfi\n";
+		};
 		AB4ABD31174368B60020A10D /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -268,6 +312,20 @@
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
 		};
+		C13B64AAC2134F4A8CB0E16F /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -278,6 +336,8 @@
 				AB4ABD1A174368B60020A10D /* main.m in Sources */,
 				AB4ABD1E174368B60020A10D /* TMSMAppDelegate.m in Sources */,
 				AB4ABD2D174368B60020A10D /* TMSMViewController.m in Sources */,
+				AB4ABD4E17438E270020A10D /* TMShareMaskTool.m in Sources */,
+				AB4ABD5117438E3D0020A10D /* TMShareMaskItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,7 +420,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -385,7 +445,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -395,10 +455,12 @@
 		};
 		AB4ABD46174368B60020A10D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C043091E49AC4307A481A3D9 /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TMShareMask/TMShareMask-Prefix.pch";
 				INFOPLIST_FILE = "TMShareMask/TMShareMask-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -406,10 +468,12 @@
 		};
 		AB4ABD47174368B60020A10D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C043091E49AC4307A481A3D9 /* Pods.xcconfig */;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TMShareMask/TMShareMask-Prefix.pch";
 				INFOPLIST_FILE = "TMShareMask/TMShareMask-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -468,6 +532,7 @@
 				AB4ABD47174368B60020A10D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AB4ABD48174368B60020A10D /* Build configuration list for PBXNativeTarget "TMShareMaskTests" */ = {
 			isa = XCConfigurationList;
@@ -476,6 +541,7 @@
 				AB4ABD4A174368B60020A10D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
