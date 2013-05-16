@@ -303,7 +303,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
              }
          }];*/
         
-        
+        /*
         NSError *error;
         NSData *jsonData = [NSJSONSerialization
                             dataWithJSONObject:@{
@@ -346,6 +346,66 @@ static TMShareMaskTool *g_sharedInstance = nil;
                          // User clicked the Send button
                          NSString *requestID = [urlParams valueForKey:@"request"];
                          NSLog(@"Request ID: %@", requestID);
+                     }
+                 }
+             }
+         }];
+         */
+        
+        // Put together the dialog parameters
+        NSMutableDictionary *params =
+        [NSMutableDictionary dictionaryWithObjectsAndKeys:
+         @"Facebook SDK for iOS", @"name",
+         @"Build great social apps and get more installs.", @"caption",
+         @"The Facebook SDK for iOS makes it easier and faster to develop Facebook integrated iOS apps.", @"description",
+         @"https://developers.facebook.com/ios", @"link",
+         @"https://raw.github.com/fbsamples/ios-3.x-howtos/master/Images/iossdk_logo.png", @"picture",
+         nil];
+        
+        /*
+         [FBWebDialogs presentDialogModallyWithSession:session
+         dialog:@"feed"
+         parameters:parameters
+         handler:handler
+         */
+        
+        // Invoke the dialog
+        [FBWebDialogs presentDialogModallyWithSession:nil
+                                               dialog:@"feed"
+                                               parameters:params
+                                                  handler:
+         ^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
+             if (error) {
+                 // Error launching the dialog or publishing a story.
+                 LOG_GENERAL(2, @"Error publishing story.");
+                 [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+             } else {
+                 if (result == FBWebDialogResultDialogNotCompleted) {
+                     // User clicked the "x" icon
+                     LOG_GENERAL(2, @"User canceled story publishing.");
+                     [self _finishWithError:(TMShareMaskTool_Errcode_User_Cancel)];
+                 } else {
+                     // Handle the publish feed callback
+                     NSDictionary *urlParams = [self parseURLParams:[resultURL query]];
+                     if (![urlParams valueForKey:@"post_id"]) {
+                         // User clicked the Cancel button
+                         LOG_GENERAL(2, @"User canceled story publishing.");
+                         [self _finishWithError:(TMShareMaskTool_Errcode_User_Cancel)];
+                     } else {
+                         // User clicked the Share button
+                         /*NSString *msg = [NSString stringWithFormat:
+                                          @"Posted story, id: %@",
+                                          [urlParams valueForKey:@"post_id"]];
+                         NSLog(@"%@", msg);
+                         // Show the result in an alert
+                         [[[UIAlertView alloc] initWithTitle:@"Result"
+                                                     message:msg
+                                                    delegate:nil
+                                           cancelButtonTitle:@"OK!"
+                                           otherButtonTitles:nil]
+                          show];*/
+                         
+                         [self _finishWithSuccess];
                      }
                  }
              }
