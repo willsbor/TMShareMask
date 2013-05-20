@@ -13,29 +13,4 @@
     #import <Foundation/Foundation.h>
 
 
-#import <NSLogger/LoggerCommon.h>
-#import <NSLogger/LoggerClient.h>
-
-
-#if defined(DEBUG) && !defined(NDEBUG)
-#undef assert
-#if __DARWIN_UNIX03
-#define assert(e) \
-(__builtin_expect(!(e), 0) ? (CFShow(CFSTR("assert going to fail, connect NSLogger NOW\n")), LoggerFlush(NULL,YES), __assert_rtn(__func__, __FILE__, __LINE__, #e)) : (void)0)
-#else
-#define assert(e)  \
-(__builtin_expect(!(e), 0) ? (CFShow(CFSTR("assert going to fail, connect NSLogger NOW\n")), LoggerFlush(NULL,YES), __assert(#e, __FILE__, __LINE__)) : (void)0)
-#endif
-#endif
-
-#ifdef DEBUG
-#define LOG_NETWORK(level, ...)    LogMessageF(__FILE__,__LINE__,__FUNCTION__,@"network",level,__VA_ARGS__)
-#define LOG_GENERAL(level, ...)    LogMessageF(__FILE__,__LINE__,__FUNCTION__,@"general",level,__VA_ARGS__)
-#define LOG_GRAPHICS(level, ...)   LogMessageF(__FILE__,__LINE__,__FUNCTION__,@"graphics",level,__VA_ARGS__)
-#else
-#define LOG_NETWORK(...)    do{}while(0)
-#define LOG_GENERAL(...)    do{}while(0)
-#define LOG_GRAPHICS(...)   do{}while(0)
-#endif
-
 #endif
