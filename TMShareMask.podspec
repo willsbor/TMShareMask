@@ -1,13 +1,13 @@
 Pod::Spec.new do |s|
   s.name         = "TMShareMask"
   s.version      = "0.0.1"
-  s.summary      = "Thinker Mobile for Project,  share text on SMS, email, Facebook or Line "
+  s.summary      = "Thinker Mobile for Project,  share text on SMS, email, Facebook or Line ."
   s.homepage     = "https://github.com/willsbor/TMShareMask"
   s.license      = {
     :type => 'MIT'
   }
   s.author       = { "KangKang" => "kang@thinkermobile.com" }
-  s.source       = { :git => "git@github.com:willsbor/TMShareMask.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/willsbor/TMShareMask.git", :tag => "#{s.version}" }
   s.platform     = :ios, '5.0'
   s.ios.deployment_target = '5.0'
   s.source_files = 'TMShareMask/TMShareMask'
