@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "TMShareMask"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "Thinker Mobile for Project,  share text on SMS, email, Facebook or Line ."
   s.homepage     = "https://github.com/willsbor/TMShareMask"
   s.license      = {
