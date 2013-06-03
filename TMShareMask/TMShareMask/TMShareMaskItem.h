@@ -22,9 +22,7 @@ typedef enum
 
 @property (nonatomic) TMShareMaskItem_Action action;
 
-@property (nonatomic, strong) NSString *text;
-@property (nonatomic, strong) NSString *title;
-//@property (nonatomic, strong) UIImage *image;
+@property (nonatomic, strong) NSDictionary *shareContent;
 
 @property (nonatomic, weak) UIViewController *baseViewController;
 

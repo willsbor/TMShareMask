@@ -19,7 +19,7 @@
 
 - (IBAction)clickSMS:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"text": @"test text"};
     item.action = TMShareMaskItem_Action_SMS_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -27,8 +27,7 @@
 
 - (IBAction)clickMail:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
-    item.title = @"test title";
+    item.shareContent = @{@"text": @"test text", @"title": @"title"};
     item.action = TMShareMaskItem_Action_Email_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -36,7 +35,7 @@
 
 - (IBAction)clickLine:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"text": @"test text"};
     item.action = TMShareMaskItem_Action_Line_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -44,7 +43,7 @@
 
 - (IBAction)clickShareFaceBook:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"name": @"abc"};
     item.action = TMShareMaskItem_Action_FaceBook_Text_By_Message_Dialog;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];

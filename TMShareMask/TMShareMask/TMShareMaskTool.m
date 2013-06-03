@@ -97,7 +97,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
     
     MFMessageComposeViewController *smsPicker = [[MFMessageComposeViewController alloc] init];
     smsPicker.messageComposeDelegate = self;
-    smsPicker.body = _activeItem.text;
+    smsPicker.body = _activeItem.shareContent[@"text"];
     [_activeItem.baseViewController presentViewController:smsPicker animated:YES completion:nil];
 }
 
@@ -132,12 +132,12 @@ static TMShareMaskTool *g_sharedInstance = nil;
     MFMailComposeViewController *mailController = [[MFMailComposeViewController alloc] init];
     if(mailController)
     {
-        NSString *title = _activeItem.title;
+        NSString *title = _activeItem.shareContent[@"title"];
         
         mailController.mailComposeDelegate = self;
         //[mailController setToRecipients:@[NSLocalizedStringFromTable(@"TMSG_UI_Send_Bad_mail_receive", @"StreetGpsWords", nil)]];
         [mailController setSubject:title];
-        [mailController setMessageBody:_activeItem.text  isHTML:NO];
+        [mailController setMessageBody:_activeItem.shareContent[@"text"]  isHTML:NO];
         [_activeItem.baseViewController presentViewController:mailController animated:YES completion:nil];
     }
 }
@@ -174,7 +174,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
         return;
     }
     
-    if ([Line shareText:_activeItem.text])
+    if ([Line shareText:_activeItem.shareContent[@"text"]])
         [self _finishWithSuccess];
     else
         [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
@@ -287,94 +287,94 @@ static TMShareMaskTool *g_sharedInstance = nil;
 {
     [self performPublishAction:^{
         
-/*
-        NSMutableDictionary *postParams = [NSMutableDictionary dictionary];
-        [postParams setObject:_activeItem.text forKey:@"message"];
-        
-        
-        __weak TMShareMaskTool *selfItem = self;
-        [FBRequestConnection startWithGraphPath:@"me/photos"
-                                     parameters:postParams
-                                     HTTPMethod:@"POST"
-                              completionHandler:^(FBRequestConnection *connection,
-                                                  id result,
-                                                  NSError *error)
+        /*
+         NSMutableDictionary *postParams = [NSMutableDictionary dictionary];
+         [postParams setObject:_activeItem.text forKey:@"message"];
+         
+         
+         __weak TMShareMaskTool *selfItem = self;
+         [FBRequestConnection startWithGraphPath:@"me/photos"
+         parameters:postParams
+         HTTPMethod:@"POST"
+         completionHandler:^(FBRequestConnection *connection,
+         id result,
+         NSError *error)
          {
-             if (error)
-             {
-                 //LogEvent_Error_Share_FB(error)
-                 //showing an alert for failure
-                 LOG_GENERAL(0, @"send failed = %@", error);
-                 [selfItem _finishWithSuccess];
-             }
-             else
-             {
-                 //showing an alert for success
-                 //LogEvent_Event_FBShareSure
-                 LOG_GENERAL(0, @"send Photo OK");
-                 [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
-             }
+         if (error)
+         {
+         //LogEvent_Error_Share_FB(error)
+         //showing an alert for failure
+         LOG_GENERAL(0, @"send failed = %@", error);
+         [selfItem _finishWithSuccess];
+         }
+         else
+         {
+         //showing an alert for success
+         //LogEvent_Event_FBShareSure
+         LOG_GENERAL(0, @"send Photo OK");
+         [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+         }
          }];*/
         
         /*
-        NSError *error;
-        NSData *jsonData = [NSJSONSerialization
-                            dataWithJSONObject:@{
-                            @"social_karma": @"5",
-                            @"badge_of_awesomeness": @"1"}
-                            options:0
-                            error:&error];
-        if (!jsonData) {
-            NSLog(@"JSON error: %@", error);
-            return;
-        }
-        NSString *giftStr = [[NSString alloc]
-                             initWithData:jsonData
-                             encoding:NSUTF8StringEncoding];
-        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                       giftStr, @"data",
-                                       nil];
-        
-        // Display the requests dialog
-        [FBWebDialogs
+         NSError *error;
+         NSData *jsonData = [NSJSONSerialization
+         dataWithJSONObject:@{
+         @"social_karma": @"5",
+         @"badge_of_awesomeness": @"1"}
+         options:0
+         error:&error];
+         if (!jsonData) {
+         NSLog(@"JSON error: %@", error);
+         return;
+         }
+         NSString *giftStr = [[NSString alloc]
+         initWithData:jsonData
+         encoding:NSUTF8StringEncoding];
+         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+         giftStr, @"data",
+         nil];
+         
+         // Display the requests dialog
+         [FBWebDialogs
          presentRequestsDialogModallyWithSession:nil
          message:@"Learn how to make your iOS apps social."
          title:nil
          parameters:params
          handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
-             if (error) {
-                 // Error launching the dialog or sending the request.
-                 NSLog(@"Error sending request.");
-             } else {
-                 if (result == FBWebDialogResultDialogNotCompleted) {
-                     // User clicked the "x" icon
-                     NSLog(@"User canceled request.");
-                 } else {
-                     // Handle the send request callback
-                     NSDictionary *urlParams = [self parseURLParams:[resultURL query]];
-                     if (![urlParams valueForKey:@"request"]) {
-                         // User clicked the Cancel button
-                         NSLog(@"User canceled request.");
-                     } else {
-                         // User clicked the Send button
-                         NSString *requestID = [urlParams valueForKey:@"request"];
-                         NSLog(@"Request ID: %@", requestID);
-                     }
-                 }
-             }
+         if (error) {
+         // Error launching the dialog or sending the request.
+         NSLog(@"Error sending request.");
+         } else {
+         if (result == FBWebDialogResultDialogNotCompleted) {
+         // User clicked the "x" icon
+         NSLog(@"User canceled request.");
+         } else {
+         // Handle the send request callback
+         NSDictionary *urlParams = [self parseURLParams:[resultURL query]];
+         if (![urlParams valueForKey:@"request"]) {
+         // User clicked the Cancel button
+         NSLog(@"User canceled request.");
+         } else {
+         // User clicked the Send button
+         NSString *requestID = [urlParams valueForKey:@"request"];
+         NSLog(@"Request ID: %@", requestID);
+         }
+         }
+         }
          }];
          */
         
         // Put together the dialog parameters
-        NSMutableDictionary *params =
-        [NSMutableDictionary dictionaryWithObjectsAndKeys:
+        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithDictionary:_activeItem.shareContent];
+        /*[NSMutableDictionary dictionaryWithObjectsAndKeys:
          @"Facebook SDK for iOS", @"name",
          @"Build great social apps and get more installs.", @"caption",
          @"The Facebook SDK for iOS makes it easier and faster to develop Facebook integrated iOS apps.", @"description",
          @"https://developers.facebook.com/ios", @"link",
          @"https://raw.github.com/fbsamples/ios-3.x-howtos/master/Images/iossdk_logo.png", @"picture",
          nil];
-        
+         */
         /*
          [FBWebDialogs presentDialogModallyWithSession:session
          dialog:@"feed"
@@ -385,8 +385,8 @@ static TMShareMaskTool *g_sharedInstance = nil;
         // Invoke the dialog
         [FBWebDialogs presentDialogModallyWithSession:nil
                                                dialog:@"feed"
-                                               parameters:params
-                                                  handler:
+                                           parameters:params
+                                              handler:
          ^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
              if (error) {
                  // Error launching the dialog or publishing a story.
@@ -407,15 +407,15 @@ static TMShareMaskTool *g_sharedInstance = nil;
                      } else {
                          // User clicked the Share button
                          /*NSString *msg = [NSString stringWithFormat:
-                                          @"Posted story, id: %@",
-                                          [urlParams valueForKey:@"post_id"]];
-                         NSLog(@"%@", msg);
-                         // Show the result in an alert
-                         [[[UIAlertView alloc] initWithTitle:@"Result"
-                                                     message:msg
-                                                    delegate:nil
-                                           cancelButtonTitle:@"OK!"
-                                           otherButtonTitles:nil]
+                          @"Posted story, id: %@",
+                          [urlParams valueForKey:@"post_id"]];
+                          NSLog(@"%@", msg);
+                          // Show the result in an alert
+                          [[[UIAlertView alloc] initWithTitle:@"Result"
+                          message:msg
+                          delegate:nil
+                          cancelButtonTitle:@"OK!"
+                          otherButtonTitles:nil]
                           show];*/
                          
                          [self _finishWithSuccess];
