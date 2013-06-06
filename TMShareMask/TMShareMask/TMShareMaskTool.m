@@ -132,7 +132,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
     MFMailComposeViewController *mailController = [[MFMailComposeViewController alloc] init];
     if(mailController)
     {
-        NSString *title = _activeItem.shareContent[@"title"];
+        NSString *title = _activeItem.shareContent[@"subject"];
         
         mailController.mailComposeDelegate = self;
         //[mailController setToRecipients:@[NSLocalizedStringFromTable(@"TMSG_UI_Send_Bad_mail_receive", @"StreetGpsWords", nil)]];
