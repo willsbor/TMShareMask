@@ -19,7 +19,7 @@
 
 - (IBAction)clickSMS:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"text": @"test text"};
     item.action = TMShareMaskItem_Action_SMS_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -27,8 +27,7 @@
 
 - (IBAction)clickMail:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
-    item.title = @"test title";
+    item.shareContent = @{@"text": @"test text", @"title": @"title"};
     item.action = TMShareMaskItem_Action_Email_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -36,7 +35,7 @@
 
 - (IBAction)clickLine:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"text": @"test text"};
     item.action = TMShareMaskItem_Action_Line_Text;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
@@ -44,11 +43,28 @@
 
 - (IBAction)clickShareFaceBook:(id)sender {
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
-    item.text = @"test text";
+    item.shareContent = @{@"name": @"abc"};
     item.action = TMShareMaskItem_Action_FaceBook_Text_By_Message_Dialog;
     item.baseViewController = self;
     [[TMShareMaskTool sharedInstance] executeItem:item];
 }
+
+- (IBAction)clickShareFB_CreateAlbum:(id)sender {
+    TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
+    item.shareContent = @{@"name": @"abc",
+                          @"message": @"detail message",
+                          @"privacy": @"{'value':'EVERYONE'}",
+                          @"photos": @[@{@"source": UIImagePNGRepresentation([UIImage imageNamed:@"Default.png"]),
+                                         @"message": @"test1"},
+                                       @{@"source": UIImagePNGRepresentation([UIImage imageNamed:@"Default-568h@2x.png"]),
+                                         @"message": @"test2"},
+                                       @{@"source": UIImagePNGRepresentation([UIImage imageNamed:@"Default.png"]),
+                                         @"message": @"test3"}]};
+    item.action = TMShareMaskItem_Action_FaceBook_Create_Album_With_Upload_Photos;
+    item.baseViewController = self;
+    [[TMShareMaskTool sharedInstance] executeItem:item];
+}
+
 
 - (void) shareMask:(TMShareMaskTool *)aTool FinishItem:(TMShareMaskItem *)aItem Error:(NSError *)aError
 {

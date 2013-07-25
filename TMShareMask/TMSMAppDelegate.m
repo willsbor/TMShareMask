@@ -8,12 +8,16 @@
 
 #import "TMSMAppDelegate.h"
 #import <FacebookSDK/FacebookSDK.h>
+#import <NSLogger/LoggerClient.h>
 
 @implementation TMSMAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    
+    LoggerSetOptions(LoggerGetDefaultLogger(), kLoggerOption_LogToConsole);
+    
     return YES;
 }
 							
