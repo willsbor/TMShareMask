@@ -68,7 +68,8 @@
 
 - (void) shareMask:(TMShareMaskTool *)aTool FinishItem:(TMShareMaskItem *)aItem Error:(NSError *)aError
 {
-    if (aError == nil) {
+    if (aError == nil ||
+        aError.code == TMShareMaskTool_Errcode_Finish) {
         NSString *msg = @"success";
         if (aItem.action == TMShareMaskItem_Action_SMS_Text) {
             msg = @"sms success";

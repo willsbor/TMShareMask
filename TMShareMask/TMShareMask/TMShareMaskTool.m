@@ -68,9 +68,26 @@ static TMShareMaskTool *g_sharedInstance = nil;
             break;
             
         case TMShareMaskItem_Action_FaceBook_Create_Album_With_Upload_Photos:
-            [self _createAlbumWithUploadPhotos];
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self _createAlbumWithUploadPhotos];
+            });
             break;
-            
+        }
+        case TMShareMaskItem_Action_FaceBook_Create_Album:
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self _createAlbum];
+            });
+            break;
+        }
+        case TMShareMaskItem_Action_FaceBook_Upload_Photos_To_Album:
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self _uploadPhotosToAlbum];
+            });
+            break;
+        }
         default:
             NSAssert(false, @"Not support this type");
             break;
@@ -78,15 +95,35 @@ static TMShareMaskTool *g_sharedInstance = nil;
 }
 
 - (void) _finishWithSuccess{
+    [self _finishWithSuccessWithUserInfo:nil];
+}
+
+- (void) _finishWithSuccessWithUserInfo:(id)aUserInfo{
+    NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class]) code:TMShareMaskTool_Errcode_Finish userInfo:aUserInfo]);
     if (_delegate) [_delegate shareMask:self
                              FinishItem:_activeItem
-                                  Error:nil];
+                                  Error:error];
+    if (_activeItem.taskHandler) {
+        _activeItem.taskHandler(_activeItem, 1.0f, error);
+    }
 }
 
 - (void) _finishWithError:(TMShareMaskTool_Errcode)aError
 {
+    [self _finishWithError:aError WithUserInfo:nil];
+}
+
+- (void) _finishWithError:(TMShareMaskTool_Errcode)aError WithUserInfo:(id)aUserInfo
+{
+    NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
+                                          code:aError
+                                      userInfo:aUserInfo]);
     if (_delegate)
-        [_delegate shareMask:self FinishItem:_activeItem Error:([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class]) code:aError userInfo:nil])];
+        [_delegate shareMask:self FinishItem:_activeItem Error:error];
+    
+    if (_activeItem.taskHandler) {
+        _activeItem.taskHandler(_activeItem, 1.0f, error);
+    }
 }
 
 #pragma mark - SMS
@@ -302,7 +339,30 @@ static TMShareMaskTool *g_sharedInstance = nil;
     }
 }
 
-- (void) _createAlbumWithUploadPhotos
+- (void) _createAlbum
+{
+    __weak TMShareMaskTool *selfItem = self;
+    [self __createAlbumComplete:^(FBRequestConnection *connection,
+                                  id result,
+                                  NSError *error)
+     {
+         if (error)
+         {
+             //showing an alert for failure
+             LOG_GENERAL(0, @"create Album failed = %@", error);
+             [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+         }
+         else
+         {
+             //showing an alert for success
+             LOG_GENERAL(0, @"create Album OK result = %@", result);
+             
+             [self _finishWithSuccessWithUserInfo:result];
+         }
+     }];
+}
+
+- (void) __createAlbumComplete:(FBRequestHandler)aBlock
 {
     [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^{
         NSMutableDictionary *postParams = [NSMutableDictionary dictionary];
@@ -310,66 +370,101 @@ static TMShareMaskTool *g_sharedInstance = nil;
         postParams[@"message"] = _activeItem.shareContent[@"message"];
         postParams[@"privacy"] = _activeItem.shareContent[@"privacy"];
         
-        __weak TMShareMaskTool *selfItem = self;
+        
         [FBRequestConnection startWithGraphPath:@"me/albums"
                                      parameters:postParams
                                      HTTPMethod:@"POST"
-                              completionHandler:^(FBRequestConnection *connection,
-                                                  id result,
-                                                  NSError *error)
-         {
-             if (error)
-             {
-                 //showing an alert for failure
-                 LOG_GENERAL(0, @"create Album failed = %@", error);
-                 [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
-             }
-             else
-             {
-                 //showing an alert for success
-                 LOG_GENERAL(0, @"create Album OK result = %@", result);
-                 //[selfItem _finishWithSuccess];
-                 
-                 /// 接著傳圖片
-                 NSArray *photos = _activeItem.shareContent[@"photos"];
-                
-                 __block int32_t errcount = 0;
-                 __block int32_t taskcount = 0;
-                 for (NSDictionary *photo in photos) {
-                     [FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"%@/photos", result[@"id"]]
-                                                  parameters:photo
-                                                  HTTPMethod:@"POST"
-                                           completionHandler:^(FBRequestConnection *connection,
-                                                               id result,
-                                                               NSError *error)
-                      {
-                          taskcount++;
-                          
-                          if (error)
-                          {
-                              //showing an alert for failure
-                              LOG_GENERAL(0, @"upload photo failed = %@", error);
-                              errcount++;
-                          }
-                          else
-                          {
-                              //showing an alert for success
-                          }
-                          
-                          if (taskcount == [photos count]) {
-                              if (errcount > 0) {
-                                  
-                                  [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
-                              } else {
-                                  LOG_GENERAL(0, @"upload photo OK result = %@", result);
-                                  [selfItem _finishWithSuccess];
-                              }
-                          }
-                      }];
-                 }/// for (NSDictionary *photo in photos) {
-             }
-         }];
+                              completionHandler:aBlock];
     }];
+}
+
+- (void) _uploadPhotosToAlbum
+{
+    NSString *albumID = _activeItem.shareContent[@"albumID"];
+    [self _uploadPhotosToAlbumBy:albumID];
+}
+
+- (void) _uploadPhotosToAlbumBy:(NSString *)albumID
+{
+    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^{
+        NSArray *photos = _activeItem.shareContent[@"photos"];
+        [self _sequenUploadIndex:0 AtArray:photos onAlbum:albumID];
+    }];
+}
+
+- (void) _createAlbumWithUploadPhotos
+{
+    __weak TMShareMaskTool *selfItem = self;
+    [self __createAlbumComplete:^(FBRequestConnection *connection,
+                                  id result,
+                                  NSError *error)
+     {
+         if (error)
+         {
+             //showing an alert for failure
+             LOG_GENERAL(0, @"create Album failed = %@", error);
+             [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+         }
+         else
+         {
+             //showing an alert for success
+             LOG_GENERAL(0, @"create Album OK result = %@", result);
+             
+             
+             if (_activeItem.taskHandler) {
+                 NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
+                                                       code:TMShareMaskTool_Errcode_Doing
+                                                   userInfo:result]);
+                     _activeItem.taskHandler(_activeItem, 0.1f, error);
+             }
+             
+             /// 接著傳圖片
+             [self _uploadPhotosToAlbumBy:result[@"id"]];
+         }
+     }];
+}
+
+- (void) _sequenUploadIndex:(int)aIndex AtArray:(NSArray *)aDatas onAlbum:(NSString *)aAlbumID
+{
+    NSDictionary *photo = aDatas[aIndex];
+    
+    __weak TMShareMaskTool *selfItem = self;
+    [FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"%@/photos", aAlbumID]
+                                 parameters:photo
+                                 HTTPMethod:@"POST"
+                          completionHandler:^(FBRequestConnection *connection,
+                                              id result,
+                                              NSError *error)
+     {
+         if (error)
+         {
+             //showing an alert for failure
+             LOG_GENERAL(0, @"upload photo failed = %@", error);
+             
+             [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)
+                           WithUserInfo:@{@"index": @(aIndex), @"result": result}];
+         }
+         else
+         {
+             //showing an alert for success
+             
+             if (_activeItem.taskHandler) {
+                 NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
+                                                       code:TMShareMaskTool_Errcode_Doing
+                                                   userInfo:@{@"index": @(aIndex),
+                                                              @"result": result}]);
+                     _activeItem.taskHandler(_activeItem, 0.1f + ((CGFloat)aIndex / [aDatas count]) * 0.9f, error);
+             }
+             
+             if (aIndex + 1 < [aDatas count]) {
+                 [self _sequenUploadIndex:aIndex + 1  AtArray:aDatas onAlbum:aAlbumID];
+             }
+             else {
+                 LOG_GENERAL(0, @"upload photo OK result = %@", result);
+                 [selfItem _finishWithSuccess];
+             }
+         }
+     }];
 }
 
 - (void) _shareTextToFacebook

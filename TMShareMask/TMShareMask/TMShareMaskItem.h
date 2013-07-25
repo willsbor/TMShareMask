@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+@class TMShareMaskItem;
+
+typedef void(^ShareMaskItemTask)(TMShareMaskItem *item, float ratio, NSError *error);
+
 typedef enum
 {
     TMShareMaskItem_Action_None = 0,
@@ -15,6 +19,8 @@ typedef enum
     TMShareMaskItem_Action_Email_Text = 2000,
     TMShareMaskItem_Action_FaceBook_Text_By_Message_Dialog = 3000,
     TMShareMaskItem_Action_FaceBook_Create_Album_With_Upload_Photos = 3100,
+    TMShareMaskItem_Action_FaceBook_Create_Album = 3101,
+    TMShareMaskItem_Action_FaceBook_Upload_Photos_To_Album = 3102,
     TMShareMaskItem_Action_Line_Text = 4000,
     
 } TMShareMaskItem_Action;
@@ -27,6 +33,6 @@ typedef enum
 
 @property (nonatomic, weak) UIViewController *baseViewController;
 
-//+ (TMShareMaskItem *) shareMaskItemWithText:(NSString *) atAction:(TMShareMaskItem_Action)aAction;
+@property (nonatomic, copy) ShareMaskItemTask taskHandler;
 
 @end

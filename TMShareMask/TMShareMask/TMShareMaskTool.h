@@ -11,9 +11,11 @@
 
 typedef enum
 {
-    TMShareMaskTool_Errcode_Failed = 1,
-    TMShareMaskTool_Errcode_Not_Support = 1000,
-    TMShareMaskTool_Errcode_User_Cancel = 2000,
+    TMShareMaskTool_Errcode_Finish = 0,
+    TMShareMaskTool_Errcode_Doing = 1,
+    TMShareMaskTool_Errcode_Failed = 1000,
+    TMShareMaskTool_Errcode_Not_Support = 1001,
+    TMShareMaskTool_Errcode_User_Cancel = 1002,
 } TMShareMaskTool_Errcode;
 
 @class TMShareMaskItem;
