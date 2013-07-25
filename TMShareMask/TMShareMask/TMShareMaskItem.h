@@ -14,6 +14,7 @@ typedef enum
     TMShareMaskItem_Action_SMS_Text = 1000,
     TMShareMaskItem_Action_Email_Text = 2000,
     TMShareMaskItem_Action_FaceBook_Text_By_Message_Dialog = 3000,
+    TMShareMaskItem_Action_FaceBook_Create_Album_With_Upload_Photos = 3100,
     TMShareMaskItem_Action_Line_Text = 4000,
     
 } TMShareMaskItem_Action;
