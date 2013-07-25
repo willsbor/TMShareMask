@@ -428,6 +428,8 @@ static TMShareMaskTool *g_sharedInstance = nil;
 {
     NSDictionary *photo = aDatas[aIndex];
     
+    LOG_GENERAL(6, @"upload photo parameters = %@", photo[@"message"]);
+
     __weak TMShareMaskTool *selfItem = self;
     [FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"%@/photos", aAlbumID]
                                  parameters:photo
@@ -442,7 +444,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
              LOG_GENERAL(0, @"upload photo failed = %@", error);
              
              [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)
-                           WithUserInfo:@{@"index": @(aIndex), @"result": result}];
+                           WithUserInfo:@{@"index": @(aIndex), @"result": (result == nil) ? @{} : result}];
          }
          else
          {
@@ -452,7 +454,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                  NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
                                                        code:TMShareMaskTool_Errcode_Doing
                                                    userInfo:@{@"index": @(aIndex),
-                                                              @"result": result}]);
+                                                              @"result": (result == nil) ? @{} : result}]);
                      _activeItem.taskHandler(_activeItem, 0.1f + ((CGFloat)aIndex / [aDatas count]) * 0.9f, error);
              }
              
