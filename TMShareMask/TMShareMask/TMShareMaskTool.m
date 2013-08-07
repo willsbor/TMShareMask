@@ -139,6 +139,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
     MFMessageComposeViewController *smsPicker = [[MFMessageComposeViewController alloc] init];
     smsPicker.messageComposeDelegate = self;
     smsPicker.body = _activeItem.shareContent[@"text"];
+    smsPicker.recipients = _activeItem.shareContent[@"recipients"];
     [_activeItem.baseViewController presentViewController:smsPicker animated:YES completion:nil];
 }
 
