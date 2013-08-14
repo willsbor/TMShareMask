@@ -258,7 +258,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                                            tokenCacheStrategy:tokenCachingStrategy];
         [FBSession setActiveSession:session];
         
-        [session openWithBehavior:FBSessionLoginBehaviorUseSystemAccountIfPresent //FBSessionLoginBehaviorWithFallbackToWebView
+        [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
                 completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
                     
                     if (status == FBSessionStateClosed
