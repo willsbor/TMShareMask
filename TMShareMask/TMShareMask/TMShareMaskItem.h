@@ -11,6 +11,7 @@
 @class TMShareMaskItem;
 
 typedef void(^ShareMaskItemTask)(TMShareMaskItem *item, float ratio, NSError *error);
+typedef BOOL(^ShareMaskItemCancelBlock)(void);
 
 typedef enum
 {
@@ -34,5 +35,7 @@ typedef enum
 @property (nonatomic, weak) UIViewController *baseViewController;
 
 @property (nonatomic, copy) ShareMaskItemTask taskHandler;
+
+@property (nonatomic, copy) ShareMaskItemCancelBlock cancelHandler;
 
 @end

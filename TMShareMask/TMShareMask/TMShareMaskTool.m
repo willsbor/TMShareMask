@@ -388,6 +388,11 @@ static TMShareMaskTool *g_sharedInstance = nil;
 - (void) _uploadPhotosToAlbumBy:(NSString *)albumID
 {
     [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^{
+        
+        if (_activeItem.cancelHandler && _activeItem.cancelHandler()) {
+            return ;
+        }
+        
         NSArray *photos = _activeItem.shareContent[@"photos"];
         [self _sequenUploadIndex:0 AtArray:photos onAlbum:albumID];
     }];
@@ -427,6 +432,10 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) _sequenUploadIndex:(int)aIndex AtArray:(NSArray *)aDatas onAlbum:(NSString *)aAlbumID
 {
+    if (_activeItem.cancelHandler && _activeItem.cancelHandler()) {
+        return ;
+    }
+    
     NSDictionary *photo = aDatas[aIndex];
     
     LOG_GENERAL(6, @"upload photo parameters = %@", photo[@"message"]);
