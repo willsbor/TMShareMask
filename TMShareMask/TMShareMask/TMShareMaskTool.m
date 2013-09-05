@@ -260,33 +260,36 @@ static TMShareMaskTool *g_sharedInstance = nil;
         
         [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
                 completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
+                    LOG_GENERAL(1, @"FaceBook session = %d", status);
                     
                     if (status == FBSessionStateClosed
-                        || status == FBSessionStateClosedLoginFailed
                         || status == FBSessionStateOpenTokenExtended) {
                         return ;
                     }
                     
-                    if (error == nil) {
-                        NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
-                        [def setObject:cacheString forKey:USER_DEFAULT_FB_LOGIN];
-                        [def synchronize];
+                    if (status == FBSessionStateClosedLoginFailed) {
+                        /// 取消 登入....
+                        handler(session, status, error);
                     } else {
-                        NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
-                        [def removeObjectForKey:USER_DEFAULT_FB_LOGIN];
-                        [def synchronize];
+                        if (error == nil) {
+                            NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
+                            [def setObject:cacheString forKey:USER_DEFAULT_FB_LOGIN];
+                            [def synchronize];
+                        } else {
+                            NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
+                            [def removeObjectForKey:USER_DEFAULT_FB_LOGIN];
+                            [def synchronize];
+                        }
+                        
+                        handler(session, status, error);
                     }
-                    
-                    LOG_GENERAL(1, @"FaceBook session = %d", status);
-
-                    handler(session, status, error);
                 }];
     } else
         NSAssert(FALSE, @"undefined ");
 }
 
 // Convenience method to perform some action that requires the "publish_actions" permissions.
-- (void) performPermissions:(NSArray *)aPermissions Action:(void (^)(void)) action {
+- (void) performPermissions:(NSArray *)aPermissions Action:(void (^)(NSError *error)) action {
     
     NSAssert([FBSession activeSession] != nil, @"FBSession.activeSession is nil");
     
@@ -294,18 +297,23 @@ static TMShareMaskTool *g_sharedInstance = nil;
     LOG_GENERAL(1, @"[FBSession activeSession].isOpen = %d", [FBSession activeSession].isOpen);
     
     if (![FBSession activeSession].isOpen) {
-        void (^_fbaction)(void);
+        void (^_fbaction)(NSError *error);
         _fbaction = [action copy];
         
         __weak TMShareMaskTool *selfItem = self;
         [self loginFacebook:^(FBSession *session,
                               FBSessionState status,
                               NSError *error) {
-            if (error == nil) {
-                [selfItem performPermissions:aPermissions Action:_fbaction];
+            LOG_GENERAL(1, @"status = %d, error = %@", status, error);
+            
+            if (status == FBSessionStateClosedLoginFailed) {
+                _fbaction(error);
             } else {
-                //LogEvent_Error_FaceBook_Login(error)
-                NSLog(@"fb login error = %@", error);
+                if (error == nil) {
+                    [selfItem performPermissions:aPermissions Action:_fbaction];
+                } else {
+                    NSLog(@"fb login error = %@", error);
+                }
             }
         }];
     } else {
@@ -319,7 +327,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
         }
         
         if ([addPermissions count] > 0) {
-            void (^_fbaction)(void);
+            void (^_fbaction)(NSError *error);
             _fbaction = [action copy];
             
             //__unsafe_unretained PTGlobalVar *selfItem = self;
@@ -328,14 +336,15 @@ static TMShareMaskTool *g_sharedInstance = nil;
                                                     defaultAudience:FBSessionDefaultAudienceFriends
                                                   completionHandler:^(FBSession *session, NSError *error) {
                                                       if (!error) {
-                                                          _fbaction();
+                                                          _fbaction(error);
                                                       } else {
+                                                          _fbaction(error);
                                                           //LogEvent_Error_FaceBook_PublishPermissions(error)
                                                       }
                                                       //For this example, ignore errors (such as if user cancels).
                                                   }];
         } else {
-            action();
+            action(nil);
         }
     }
 }
@@ -365,7 +374,13 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) __createAlbumComplete:(FBRequestHandler)aBlock
 {
-    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^{
+    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^(NSError *error){
+        if (error) {
+            
+            aBlock(nil, nil, error);
+            return ;
+        }
+        
         NSMutableDictionary *postParams = [NSMutableDictionary dictionary];
         postParams[@"name"] = _activeItem.shareContent[@"name"];
         postParams[@"message"] = _activeItem.shareContent[@"message"];
@@ -387,7 +402,11 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) _uploadPhotosToAlbumBy:(NSString *)albumID
 {
-    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^{
+    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^(NSError *error){
+        
+        if (error) {
+            return ;
+        }
         
         if (_activeItem.cancelHandler && _activeItem.cancelHandler()) {
             return ;
@@ -421,7 +440,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                  NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
                                                        code:TMShareMaskTool_Errcode_Doing
                                                    userInfo:result]);
-                     _activeItem.taskHandler(_activeItem, 0.1f, error);
+                 _activeItem.taskHandler(_activeItem, 0.1f, error);
              }
              
              /// 接著傳圖片
@@ -439,7 +458,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
     NSDictionary *photo = aDatas[aIndex];
     
     LOG_GENERAL(6, @"upload photo parameters = %@", photo[@"message"]);
-
+    
     __weak TMShareMaskTool *selfItem = self;
     [FBRequestConnection startWithGraphPath:[NSString stringWithFormat:@"%@/photos", aAlbumID]
                                  parameters:photo
@@ -464,8 +483,8 @@ static TMShareMaskTool *g_sharedInstance = nil;
                  NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
                                                        code:TMShareMaskTool_Errcode_Doing
                                                    userInfo:@{@"index": @(aIndex),
-                                                              @"result": (result == nil) ? @{} : result}]);
-                     _activeItem.taskHandler(_activeItem, 0.1f + ((CGFloat)aIndex / [aDatas count]) * 0.9f, error);
+                                    @"result": (result == nil) ? @{} : result}]);
+                 _activeItem.taskHandler(_activeItem, 0.1f + ((CGFloat)aIndex / [aDatas count]) * 0.9f, error);
              }
              
              if (aIndex + 1 < [aDatas count]) {
@@ -481,85 +500,12 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) _shareTextToFacebook
 {
-    [self performPermissions:@[@"publish_actions"] Action:^{
+    [self performPermissions:@[@"publish_actions"] Action:^(NSError *error){
         
-        /*
-         NSMutableDictionary *postParams = [NSMutableDictionary dictionary];
-         [postParams setObject:_activeItem.text forKey:@"message"];
-         
-         
-         __weak TMShareMaskTool *selfItem = self;
-         [FBRequestConnection startWithGraphPath:@"me/photos"
-         parameters:postParams
-         HTTPMethod:@"POST"
-         completionHandler:^(FBRequestConnection *connection,
-         id result,
-         NSError *error)
-         {
-         if (error)
-         {
-         //LogEvent_Error_Share_FB(error)
-         //showing an alert for failure
-         LOG_GENERAL(0, @"send failed = %@", error);
-         [selfItem _finishWithSuccess];
-         }
-         else
-         {
-         //showing an alert for success
-         //LogEvent_Event_FBShareSure
-         LOG_GENERAL(0, @"send Photo OK");
-         [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
-         }
-         }];*/
-        
-        /*
-         NSError *error;
-         NSData *jsonData = [NSJSONSerialization
-         dataWithJSONObject:@{
-         @"social_karma": @"5",
-         @"badge_of_awesomeness": @"1"}
-         options:0
-         error:&error];
-         if (!jsonData) {
-         NSLog(@"JSON error: %@", error);
-         return;
-         }
-         NSString *giftStr = [[NSString alloc]
-         initWithData:jsonData
-         encoding:NSUTF8StringEncoding];
-         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-         giftStr, @"data",
-         nil];
-         
-         // Display the requests dialog
-         [FBWebDialogs
-         presentRequestsDialogModallyWithSession:nil
-         message:@"Learn how to make your iOS apps social."
-         title:nil
-         parameters:params
-         handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
-         if (error) {
-         // Error launching the dialog or sending the request.
-         NSLog(@"Error sending request.");
-         } else {
-         if (result == FBWebDialogResultDialogNotCompleted) {
-         // User clicked the "x" icon
-         NSLog(@"User canceled request.");
-         } else {
-         // Handle the send request callback
-         NSDictionary *urlParams = [self parseURLParams:[resultURL query]];
-         if (![urlParams valueForKey:@"request"]) {
-         // User clicked the Cancel button
-         NSLog(@"User canceled request.");
-         } else {
-         // User clicked the Send button
-         NSString *requestID = [urlParams valueForKey:@"request"];
-         NSLog(@"Request ID: %@", requestID);
-         }
-         }
-         }
-         }];
-         */
+        if (error) {
+            [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+            return ;
+        }
         
         // Put together the dialog parameters
         NSMutableDictionary *params = [NSMutableDictionary dictionaryWithDictionary:_activeItem.shareContent];
