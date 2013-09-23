@@ -258,7 +258,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                                            tokenCacheStrategy:tokenCachingStrategy];
         [FBSession setActiveSession:session];
         
-        [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
+        [session openWithBehavior:FBSessionLoginBehaviorUseSystemAccountIfPresent//FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
                 completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
                     LOG_GENERAL(1, @"FaceBook session = %d", status);
                     
@@ -307,7 +307,12 @@ static TMShareMaskTool *g_sharedInstance = nil;
             LOG_GENERAL(1, @"status = %d, error = %@", status, error);
             
             if (status == FBSessionStateClosedLoginFailed) {
-                _fbaction(error);
+                //// error 有資料的時候好像才是...使用者取消
+                /// 不然使用者Home艦離開fb回來取消的下一次動作 似乎會先觸發一次FBSessionStateClosedLoginFailed
+                if (error) {
+                    _fbaction(error);
+                }
+                
             } else {
                 if (error == nil) {
                     [selfItem performPermissions:aPermissions Action:_fbaction];
@@ -320,6 +325,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
         // we defer request for permission to post to the moment of post, then we check for the permission
         NSMutableArray *addPermissions = [[NSMutableArray alloc] init];
         
+        LOG_GENERAL(0, @"[FBSession activeSession].permissions = %@", [FBSession activeSession].permissions);
         for (NSString *object in aPermissions) {
             if (NO == [[FBSession activeSession].permissions containsObject:object]) {
                 [addPermissions addObject:object];
@@ -374,7 +380,8 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) __createAlbumComplete:(FBRequestHandler)aBlock
 {
-    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^(NSError *error){
+    ///@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"
+    [self performPermissions:@[@"publish_stream", @"photo_upload"] Action:^(NSError *error){
         if (error) {
             
             aBlock(nil, nil, error);
@@ -402,7 +409,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) _uploadPhotosToAlbumBy:(NSString *)albumID
 {
-    [self performPermissions:@[@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"] Action:^(NSError *error){
+    [self performPermissions:@[@"publish_stream", @"photo_upload"] Action:^(NSError *error){
         
         if (error) {
             return ;
@@ -483,7 +490,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                  NSError *error = ([NSError errorWithDomain:NSStringFromClass([TMShareMaskTool class])
                                                        code:TMShareMaskTool_Errcode_Doing
                                                    userInfo:@{@"index": @(aIndex),
-                                    @"result": (result == nil) ? @{} : result}]);
+                                                              @"result": (result == nil) ? @{} : result}]);
                  _activeItem.taskHandler(_activeItem, 0.1f + ((CGFloat)aIndex / [aDatas count]) * 0.9f, error);
              }
              
