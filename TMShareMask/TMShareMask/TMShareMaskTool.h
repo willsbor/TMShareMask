@@ -36,4 +36,6 @@ typedef enum
 
 - (void) executeItem:(TMShareMaskItem *)aItem;
 
+- (void) logoutFacebook;
+
 @end
