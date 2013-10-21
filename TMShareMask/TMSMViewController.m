@@ -53,7 +53,7 @@
     TMShareMaskItem *item = [[TMShareMaskItem alloc] init];
     item.shareContent = @{@"name": @"abc",
                           @"message": @"detail message",
-                          @"privacy": @"{'value':'EVERYONE'}",
+                          @"privacy": @"{'value':'SELF'}", //@"{'value':'EVERYONE'}",
                           @"photos": @[@{@"source": UIImagePNGRepresentation([UIImage imageNamed:@"Default.png"]),
                                          @"message": @"test1"},
                                        @{@"source": UIImagePNGRepresentation([UIImage imageNamed:@"Default-568h@2x.png"]),

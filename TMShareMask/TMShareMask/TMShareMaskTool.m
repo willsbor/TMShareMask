@@ -238,6 +238,11 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) loginFacebook:(FBSessionStateHandler)handler
 {
+    [self loginFacebook:handler withPermissions:nil];
+}
+
+- (void) loginFacebook:(FBSessionStateHandler)handler withPermissions:(NSArray*)permissions
+{
     NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
     
     NSString *cacheString = [def objectForKey:USER_DEFAULT_FB_LOGIN];
@@ -253,12 +258,12 @@ static TMShareMaskTool *g_sharedInstance = nil;
         }
         
         FBSession *session = [[FBSession alloc] initWithAppID:nil
-                                                  permissions:nil
+                                                  permissions:permissions
                                               urlSchemeSuffix:nil
                                            tokenCacheStrategy:tokenCachingStrategy];
         [FBSession setActiveSession:session];
         
-        [session openWithBehavior:FBSessionLoginBehaviorUseSystemAccountIfPresent//FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
+        [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
                 completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
                     LOG_GENERAL(1, @"FaceBook session = %d", status);
                     
@@ -320,7 +325,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                     NSLog(@"fb login error = %@", error);
                 }
             }
-        }];
+        } withPermissions:aPermissions];
     } else {
         // we defer request for permission to post to the moment of post, then we check for the permission
         NSMutableArray *addPermissions = [[NSMutableArray alloc] init];
@@ -364,6 +369,9 @@ static TMShareMaskTool *g_sharedInstance = nil;
      {
          if (error)
          {
+             if (error.code == 5) {
+                 [self logoutFacebook];
+             }
              //showing an alert for failure
              LOG_GENERAL(0, @"create Album failed = %@", error);
              [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
@@ -381,7 +389,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
 - (void) __createAlbumComplete:(FBRequestHandler)aBlock
 {
     ///@"publish_actions", @"user_photos", @"publish_stream", @"photo_upload"
-    [self performPermissions:@[@"publish_stream", @"photo_upload"] Action:^(NSError *error){
+    [self performPermissions:@[@"publish_stream", @"photo_upload", @"user_photos"] Action:^(NSError *error){
         if (error) {
             
             aBlock(nil, nil, error);
@@ -409,7 +417,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
 
 - (void) _uploadPhotosToAlbumBy:(NSString *)albumID
 {
-    [self performPermissions:@[@"publish_stream", @"photo_upload"] Action:^(NSError *error){
+    [self performPermissions:@[@"publish_stream", @"photo_upload", @"user_photos"] Action:^(NSError *error){
         
         if (error) {
             return ;
@@ -434,6 +442,10 @@ static TMShareMaskTool *g_sharedInstance = nil;
          if (error)
          {
              //showing an alert for failure
+             if (error.code == 5) {
+                 [self logoutFacebook];
+             }
+             
              LOG_GENERAL(0, @"create Album failed = %@", error);
              [selfItem _finishWithError:(TMShareMaskTool_Errcode_Failed)];
          }
