@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.source_files = 'TMShareMask/TMShareMask'
   s.framework  = 'CoreGraphics', 'MessageUI'
   s.requires_arc = true
-  s.dependency 'Facebook-iOS-SDK',  '~> 3.8.0'
+  s.dependency 'Facebook-iOS-SDK',  '~> 3.6.0'
   s.dependency 'LineKit'
   s.dependency 'NSLogger',   '>=1.1'
 end
