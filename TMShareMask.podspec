@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "TMShareMask"
-  s.version      = "0.2.3"
+  s.version      = "0.3.0"
   s.summary      = "Thinker Mobile for Project,  share text on SMS, email, Facebook or Line ."
   s.homepage     = "https://github.com/willsbor/TMShareMask"
   s.license      = 'MIT'
@@ -11,7 +11,8 @@ Pod::Spec.new do |s|
   s.source_files = 'TMShareMask/TMShareMask'
   s.framework  = 'CoreGraphics', 'MessageUI'
   s.requires_arc = true
-  s.dependency 'Facebook-iOS-SDK',  '~> 3.8.0'
+#  s.dependency 'Facebook-iOS-SDK',  '~> 3.8.0'
+  s.dependency 'Facebook-iOS-SDK', '~> 3.8'
   s.dependency 'LineKit'
   s.dependency 'NSLogger',   '>=1.1'
 end
