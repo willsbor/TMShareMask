@@ -88,6 +88,16 @@ static TMShareMaskTool *g_sharedInstance = nil;
             });
             break;
         }
+        case TMShareMaskItem_Action_FaceBook_Login_Action:
+        {
+            [self _loginFacebookAndDoAction];
+            break;
+        }
+        case TMShareMaskItem_Action_GraphApi:
+        {
+            [self _executeGraphApi];
+            break;
+        }
         default:
             NSAssert(false, @"Not support this type");
             break;
@@ -236,12 +246,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
     [def synchronize];
 }
 
-- (void) loginFacebook:(FBSessionStateHandler)handler
-{
-    [self loginFacebook:handler withPermissions:nil];
-}
-
-- (void) loginFacebook:(FBSessionStateHandler)handler withPermissions:(NSArray*)permissions
+- (void) loginFacebook:(FBSessionStateHandler)handler withPermissions:(NSArray*)permissions withLoginBehavior:(FBSessionLoginBehavior)aBehavior
 {
     NSUserDefaults *def = [NSUserDefaults standardUserDefaults];
     
@@ -263,7 +268,7 @@ static TMShareMaskTool *g_sharedInstance = nil;
                                            tokenCacheStrategy:tokenCachingStrategy];
         [FBSession setActiveSession:session];
         
-        [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView //FBSessionLoginBehaviorUseSystemAccountIfPresent
+        [session openWithBehavior:aBehavior //FBSessionLoginBehaviorWithFallbackToWebView, FBSessionLoginBehaviorUseSystemAccountIfPresent
                 completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
                     LOG_GENERAL(1, @"FaceBook session = %d", status);
                     
@@ -293,8 +298,13 @@ static TMShareMaskTool *g_sharedInstance = nil;
         NSAssert(FALSE, @"undefined ");
 }
 
+- (void) performPermissions:(NSArray *)aPermissions Action:(void (^)(NSError *error)) action
+{
+    [self performPermissions:aPermissions withLoginBehavior:FBSessionLoginBehaviorWithFallbackToWebView Action:action];
+}
+
 // Convenience method to perform some action that requires the "publish_actions" permissions.
-- (void) performPermissions:(NSArray *)aPermissions Action:(void (^)(NSError *error)) action {
+- (void) performPermissions:(NSArray *)aPermissions withLoginBehavior:(FBSessionLoginBehavior)aBehavior Action:(void (^)(NSError *error)) action {
     
     NSAssert([FBSession activeSession] != nil, @"FBSession.activeSession is nil");
     
@@ -320,12 +330,13 @@ static TMShareMaskTool *g_sharedInstance = nil;
                 
             } else {
                 if (error == nil) {
-                    [selfItem performPermissions:aPermissions Action:_fbaction];
+                    [selfItem performPermissions:aPermissions withLoginBehavior:aBehavior Action:_fbaction];
                 } else {
                     NSLog(@"fb login error = %@", error);
                 }
             }
-        } withPermissions:aPermissions];
+        } withPermissions:aPermissions
+          withLoginBehavior:aBehavior];
     } else {
         // we defer request for permission to post to the moment of post, then we check for the permission
         NSMutableArray *addPermissions = [[NSMutableArray alloc] init];
@@ -515,6 +526,72 @@ static TMShareMaskTool *g_sharedInstance = nil;
              }
          }
      }];
+}
+
+- (void) _loginFacebookAndDoAction
+{
+    NSArray *permissions = _activeItem.shareContent[@"permissions"];
+    NSAssert(permissions, @"need some permissions for facebook login");
+    
+    FBSessionLoginBehavior defaultB = FBSessionLoginBehaviorWithFallbackToWebView;
+    
+    if (_activeItem.shareContent[@"FBSessionLoginBehavior"]) {
+        defaultB = [_activeItem.shareContent[@"FBSessionLoginBehavior"] integerValue];
+    }
+    
+    [self performPermissions:permissions withLoginBehavior:defaultB Action:^(NSError *error) {
+        if (error) {
+            [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+            return ;
+        }
+        
+        
+        [self _finishWithSuccess];
+    }];
+}
+
+- (void) _executeGraphApi
+{
+    NSArray *permissions = _activeItem.shareContent[@"permissions"];
+    NSAssert(permissions, @"need some permissions for facebook login");
+    
+    FBSessionLoginBehavior defaultB = FBSessionLoginBehaviorWithFallbackToWebView;
+    if (_activeItem.shareContent[@"FBSessionLoginBehavior"]) {
+        defaultB = [_activeItem.shareContent[@"FBSessionLoginBehavior"] integerValue];
+    }
+    
+    [self performPermissions:permissions withLoginBehavior:defaultB Action:^(NSError *error) {
+        if (error) {
+            [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+            return ;
+        }
+        
+        NSString *api = _activeItem.shareContent[@"GraphPath"];
+        NSDictionary *params = _activeItem.shareContent[@"Parameters"];
+        NSString *method = _activeItem.shareContent[@"HTTPMethod"];
+        [FBRequestConnection startWithGraphPath:api
+                                     parameters:params
+                                     HTTPMethod:(method ? method : @"GET")
+                              completionHandler:^(FBRequestConnection *connection,
+                                                  id result,
+                                                  NSError *error)
+         {
+             if (error)
+             {
+                 //showing an alert for failure
+                 LOG_GENERAL(0, @"execute Graph Api failed = %@", error);
+                 [self _finishWithError:(TMShareMaskTool_Errcode_Failed)];
+             }
+             else
+             {
+                 //showing an alert for success
+                 
+                 //LOG_GENERAL(0, @"get me data = %@", result);
+                 [self _finishWithSuccessWithUserInfo:result];
+             }
+         }];
+
+    }];
 }
 
 - (void) _shareTextToFacebook
